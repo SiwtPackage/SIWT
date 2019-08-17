@@ -1,26 +1,23 @@
-/*  2019.0603.14:23
+/*  2019.0812.10:31
 modified from duncan
 load dependency
 "siwt": "file:../pxt-siwt"
 */
 //% color="#C814B8" weight=25 icon="\uf1d4"
 namespace siwt_显示类 {
-
     let lhRGBLight: QbitRGBLight.LHQbitRGBLight;
     //% blockId="initRGBLight" block="initRGBLight before use"
     //% weight=94
     export function initRGBLight() {
         if (!lhRGBLight) {
-            lhRGBLight = QbitRGBLight.create(DigitalPin.P16, 4, QbitRGBPixelMode.RGB);
+            lhRGBLight = QbitRGBLight.create(DigitalPin.P16, 4, QbitRGBPixelMode.RGB);	
         }
         clearLight();
     }
-
     //% blockId=siwt_SevenColorLED block="SevenColorLED|%uartData"
     //% weight=93
     //% blockGap=10
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=12
-
     export function SevenColorLED(uartData: string) {
         if (uartData == "*CL01") {
             setPixelRGB(Lights.Light1, QbitRGBColors.Red)
@@ -51,9 +48,17 @@ namespace siwt_显示类 {
             setPixelRGB(Lights.Light2, QbitRGBColors.Violet)
             showLight()
         }
+	  else if (uartData == "*CL21") {
+            setPixelRGB(Lights.Light1, QbitRGBColors.White)
+            setPixelRGB(Lights.Light2, QbitRGBColors.White)
+            showLight()
+        }
+	  else if (uartData == "*CL20") {
+           clearLight()
+        }   
     }
-
     //% blockId="setBrightness" block="set brightness %brightness"
+    //% brightness.min=0 brightness.max=255
     //% weight=92
     export function setBrightness(brightness: number): void {
         lhRGBLight.setBrightness(brightness);
@@ -79,7 +84,6 @@ namespace siwt_显示类 {
     export function showLight() {
         lhRGBLight.show();
     }
-
     /**
      * Clear the color of the colored lights and turn off the lights.
      */
@@ -87,12 +91,10 @@ namespace siwt_显示类 {
     export function clearLight() {
         lhRGBLight.clear();
     }
-
 }
 
 //% color="#87CEEB" weight=24 icon="\uf1b6"
 namespace siwt_传感器类 {
-
     export enum enVoice {
         //% blockId="Voice" block="有声音"
         Voice = 0,
@@ -155,18 +157,15 @@ namespace siwt_传感器类 {
     const APDS9960_POFFSET_UR = 0x9D;
     const APDS9960_POFFSET_DL = 0x9E;
     const APDS9960_CONFIG3 = 0x9F;
-
     const LED_DRIVE_100MA = 0;
     const LED_DRIVE_50MA = 1;
     const LED_DRIVE_25MA = 2;
     const LED_DRIVE_12_5MA = 3;
-
     /* ALS Gain (AGAIN) values */
     const AGAIN_1X = 0;
     const AGAIN_4X = 1;
     const AGAIN_16X = 2;
     const AGAIN_64X = 3;
-
     /* Default values */
     const DEFAULT_ATIME = 219;    // 103ms
     const DEFAULT_WTIME = 246;    // 27ms
@@ -191,8 +190,6 @@ namespace siwt_传感器类 {
     const DEFAULT_GIEN = 0;       // Disable gesture interrupts
     const DEFAULT_LDRIVE = LED_DRIVE_100MA;
     const DEFAULT_AGAIN = AGAIN_4X;
-
-
     const OFF = 0;
     const ON = 1;
     const POWER = 0;
@@ -203,21 +200,18 @@ namespace siwt_传感器类 {
     const PROXIMITY_INT = 5;
     const GESTURE = 6;
     const ALL = 7;
-
-
+	
     function i2cwrite(reg: number, value: number) {
         let buf = pins.createBuffer(2);
         buf[0] = reg;
         buf[1] = value;
         pins.i2cWriteBuffer(APDS9960_I2C_ADDR, buf);
     }
-
     function i2cread(reg: number): number {
         pins.i2cWriteNumber(APDS9960_I2C_ADDR, reg, NumberFormat.UInt8BE);
         let val = pins.i2cReadNumber(APDS9960_I2C_ADDR, NumberFormat.UInt8BE);
         return val;
     }
-
     function InitColor(): boolean {
         let id = i2cread(APDS9960_ID);
         //  serial.writeLine("id:")
@@ -242,7 +236,6 @@ namespace siwt_传感器类 {
         i2cwrite(APDS9960_CONFIG3, DEFAULT_CONFIG3);
         return true;
     }
-
     function setMode(mode: number, enable: number) {
         let reg_val = getMode();
         /* Change bit(s) in ENABLE register */
@@ -266,12 +259,10 @@ namespace siwt_传感器类 {
         }
         i2cwrite(APDS9960_ENABLE, reg_val);
     }
-
     function getMode(): number {
         let enable_value = i2cread(APDS9960_ENABLE);
         return enable_value;
     }
-
     function setLEDDrive(drive: number) {
         let val = i2cread(APDS9960_CONTROL);
         /* Set bits in register to given value */
@@ -281,22 +272,18 @@ namespace siwt_传感器类 {
         val |= drive;
         i2cwrite(APDS9960_CONTROL, val);
     }
-
     function setLightIntLowThreshold(threshold: number) {
         let val_low = threshold & 0x00FF;
         let val_high = (threshold & 0xFF00) >> 8;
         i2cwrite(APDS9960_AILTL, val_low);
         i2cwrite(APDS9960_AILTH, val_high);
     }
-
     function setLightIntHighThreshold(threshold: number) {
         let val_low = threshold & 0x00FF;
         let val_high = (threshold & 0xFF00) >> 8;
         i2cwrite(APDS9960_AIHTL, val_low);
         i2cwrite(APDS9960_AIHTH, val_high);
     }
-
-
     function enableLightSensor(interrupts: boolean) {
         setAmbientLightGain(DEFAULT_AGAIN);
         if (interrupts) {
@@ -308,7 +295,6 @@ namespace siwt_传感器类 {
         enablePower();
         setMode(AMBIENT_LIGHT, 1);
     }
-
     function setAmbientLightGain(drive: number) {
         let val = i2cread(APDS9960_CONTROL);
         /* Set bits in register to given value */
@@ -317,17 +303,14 @@ namespace siwt_传感器类 {
         val |= drive;
         i2cwrite(APDS9960_CONTROL, val);
     }
-
     function getAmbientLightGain(): number {
         let val = i2cread(APDS9960_CONTROL);
         val &= 0b00000011;
         return val;
     }
-
     function enablePower() {
         setMode(POWER, 1);
     }
-
     function setAmbientLightIntEnable(enable: number) {
         let val = i2cread(APDS9960_ENABLE);
         /* Set bits in register to given value */
@@ -337,7 +320,6 @@ namespace siwt_传感器类 {
         val |= enable;
         i2cwrite(APDS9960_ENABLE, val);
     }
-
     function readAmbientLight(): number {
         let val_byte = i2cread(APDS9960_CDATAL);
         let val = val_byte;
@@ -345,34 +327,27 @@ namespace siwt_传感器类 {
         val = val + val_byte << 8;
         return val;
     }
-
     function readRedLight(): number {
-
         let val_byte = i2cread(APDS9960_RDATAL);
         let val = val_byte;
         val_byte = i2cread(APDS9960_RDATAH);
         val = val + val_byte << 8;
         return val;
     }
-
     function readGreenLight(): number {
-
         let val_byte = i2cread(APDS9960_GDATAL);
         let val = val_byte;
         val_byte = i2cread(APDS9960_GDATAH);
         val = val + val_byte << 8;
         return val;
     }
-
     function readBlueLight(): number {
-
         let val_byte = i2cread(APDS9960_BDATAL);
         let val = val_byte;
         val_byte = i2cread(APDS9960_BDATAH);
         val = val + val_byte << 8;
         return val;
     }
-
     //% blockId=siwt_initColorSensor block="initColorSensor|value %value"
     //% weight=95
     //% blockGap=10
@@ -383,7 +358,6 @@ namespace siwt_传感器类 {
         enableLightSensor(false);
         control.waitMicros(100);
     }
-
     /*
  *  Color sensor to obtain color value.
  */
@@ -401,14 +375,12 @@ namespace siwt_传感器类 {
         let g = readGreenLight();
         let b = readBlueLight();
         let t = Colors.Red;
-
         if (r > g) {
             t = Colors.Red;
         }
         else {
             t = Colors.Green;
         }
-
         if (t == Colors.Green && g < b) {
             if (b - g > 1000)
                 t = Colors.Blue;
@@ -431,7 +403,6 @@ namespace siwt_传感器类 {
         }
         else if (t == Colors.Blue && b > 2800) {
             //        serial.writeLine("blue");
-
         }
         else if (t == Colors.Green && g > 1500) {
             // serial.writeLine("green");
@@ -445,14 +416,12 @@ namespace siwt_传感器类 {
         }
         return (color == t);
     }
-
     //% blockId=siwt_Voice_Sensor block="Voice_Sensor|value %value|声音"
     //% weight=100
     //% blockGap=10
     //% color="#87CEEB"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Voice_Sensor(value: enVoice): boolean {
-
         pins.setPull(DigitalPin.P3, PinPullMode.PullUp);
         if (pins.digitalReadPin(DigitalPin.P3) == value) {
             return true;
@@ -460,7 +429,6 @@ namespace siwt_传感器类 {
         else {
             return false;
         }
-
     }
     //% blockId=siwt_Incline_Sensor block="Incline_Sensor|%value|倾斜"
     //% weight=100
@@ -468,7 +436,6 @@ namespace siwt_传感器类 {
     //% color="#87CEEB"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Incline_Sensor(value: enIR): boolean {
-
         pins.setPull(DigitalPin.P9, PinPullMode.PullUp);
         //IR_send_38k();
         if (pins.digitalReadPin(DigitalPin.P9) == value) {
@@ -477,16 +444,13 @@ namespace siwt_传感器类 {
         else {
             return false;
         }
-
     }
-
     //% blockId=siwt_Smog_Sensor block="Smog_Sensor|%value|烟雾"
     //% weight=100
     //% blockGap=10
     //% color="#87CEEB"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Smog_Sensor(value: enIR): boolean {
-
         pins.setPull(DigitalPin.P3, PinPullMode.PullUp);
         if (pins.digitalReadPin(DigitalPin.P3) == value) {
             return true;
@@ -494,7 +458,6 @@ namespace siwt_传感器类 {
         else {
             return false;
         }
-
     }
     //% blockId=siwt_Humidity_Sensor block="Humidity_Sensor|土壤湿度|%value"
     //% weight=100
@@ -502,7 +465,6 @@ namespace siwt_传感器类 {
     //% color="#87CEEB"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Humidity_Sensor(value: enOK): boolean {
-
         pins.setPull(DigitalPin.P3, PinPullMode.PullUp);
         if (pins.digitalReadPin(DigitalPin.P3) == value) {
             return false;
@@ -510,26 +472,20 @@ namespace siwt_传感器类 {
         else {
             return true;
         }
-
     }
-
-
-
     //% blockId=siwt_Touch_Sensor block="Touch_Sensor|%value|触摸"
     //% weight=100
     //% blockGap=10
     //% color="#87CEEB"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Touch_Sensor(value: enIR): boolean {
-
         pins.setPull(DigitalPin.P9, PinPullMode.PullUp);
         if (pins.digitalReadPin(DigitalPin.P9) == value) {
-            return false;
-        }
-        else {
             return true;
         }
-
+        else {
+            return false;
+        }
     }
     //% blockId=siwt_Photosensitive_Sensor block="Photosensitive_Sensor|%value|光照"
     //% weight=100
@@ -545,16 +501,13 @@ namespace siwt_传感器类 {
         else {
             return false;
         }
-
     }
-
     //% blockId=siwt_Flame_Sensor block="Flame_Sensor|%value|火焰"
     //% weight=100
     //% blockGap=10
     //% color="#87CEEB"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=4
     export function Flame_Sensor(value: enIR): boolean {
-
         pins.setPull(DigitalPin.P8, PinPullMode.PullUp);
         if (pins.digitalReadPin(DigitalPin.P8) == value) {
             return true;
@@ -562,9 +515,7 @@ namespace siwt_传感器类 {
         else {
             return false;
         }
-
     }
-
     function IR_send_38k() {
         for (let i: number = 0; i < 8; i++) {
             pins.digitalWritePin(DigitalPin.P9, 1);
@@ -589,7 +540,6 @@ namespace siwt_传感器类 {
             return false;
         }
     }
-
     //% blockId=siwt_IR_Send block="IR_Send|pin %pin"
     //% weight=100
     //% blockGap=10
@@ -639,22 +589,26 @@ namespace siwt_音乐类 {
         else if (uartData == "*C7") {
             music.ringTone(932)
         }
-        else if (uartData == "*C8") {
+        else if (uartData == "*C0") {
+            pins.setPull(DigitalPin.P0, PinPullMode.PullNone);
             pins.digitalWritePin(DigitalPin.P0, 0)
         }
-
+        else if (uartData == "*C8") {
+       //    music.beginMelody(music.builtInMelody(Melodies.PowerUp), MelodyOptions.Once)
+	     music.ringTone(139)
+			  
+        }
     }
-    //% blockId=siwt_Buzzer block="Buzzer|pin %pin|value %value"
+    //% blockId=siwt_Buzzer block="Buzzer"
     //% weight=100
     //% blockGap=10 
     //% color="#D2691E"
     //% value.min=0 value.max=1
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=8
-    export function Buzzer(value: enBuzzer): void {
+    export function Buzzer(): void {
         pins.setPull(DigitalPin.P0, PinPullMode.PullNone);
-        pins.digitalWritePin(DigitalPin.P0, value);
+        pins.digitalWritePin(DigitalPin.P0, 0);
     }
-
 }
 
 /*****************************************************************************************************************************************
@@ -664,7 +618,6 @@ namespace siwt_音乐类 {
 //% color="#0000CD" weight=21 icon="\uf185"
 
 namespace siwt_电机类 {
-
     //% blockId=siwt_Vibrator_Open block="Vibrator_Open"
     //% weight=100
     //% blockGap=10
@@ -672,9 +625,7 @@ namespace siwt_电机类 {
     //% value.min=0 value.max=1023
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=9
     export function Vibrator_Open(): void {
-
         pins.digitalWritePin(DigitalPin.P12, 1);
-
     }
     //% blockId=siwt_Vibrator_Close block="Vibrator_Close"
     //% weight=100
@@ -689,28 +640,31 @@ namespace siwt_电机类 {
 
 //% color="#006400" weight=20 icon="\uf1b9"
 namespace siwt_小车类 {
-
     const PCA9685_ADD = 0x41
     const MODE1 = 0x00
     const MODE2 = 0x01
     const SUBADR1 = 0x02
     const SUBADR2 = 0x03
     const SUBADR3 = 0x04
-
     const LED0_ON_L = 0x06
     const LED0_ON_H = 0x07
     const LED0_OFF_L = 0x08
     const LED0_OFF_H = 0x09
-
     const ALL_LED_ON_L = 0xFA
     const ALL_LED_ON_H = 0xFB
     const ALL_LED_OFF_L = 0xFC
     const ALL_LED_OFF_H = 0xFD
-
     const PRESCALE = 0xFE
     let initialized = false
     let g_mode = 0
-    let value_past = 90
+    let value_past = 0
+    let value1_past = -1
+    let value2_past = -1
+    let value3_past = -1
+    let value4_past = -1
+    let value5_past = -1
+    let value6_past = -1
+    let car_speed = 200
     export enum enMusic {
         dadadum = 0,
         entertainer,
@@ -766,15 +720,12 @@ namespace siwt_小车类 {
         Car_XunJi = 1,
         //% blockId="Car_BiZhang" block="避障"  
         Car_BiZhang = 2
-
     }
     export enum MotorNum {
         //% blockId="Motor0" block="电机1"
         Motor0 = 0,
         //% blockId="Motor1"  block="电机2"
         Motor1 = 1
-
-
     }
     export enum MotorDir {
         //% blockId="clockwise" block="正转"
@@ -796,7 +747,11 @@ namespace siwt_小车类 {
         //% blockId="Car_SpinLeft" block="原地左旋"
         Car_SpinLeft = 6,
         //% blockId="Car_SpinRight" block="原地右旋"
-        Car_SpinRight = 7
+        Car_SpinRight = 7,
+	//% blockId="Car_SpeedUp" block="加速"
+	Car_SpeedUp  = 8,
+	//% blockId="Car_SpeedDown" block="减速"
+	Car_SpeedDown = 9
     }
     //% blockId=siwt_BluetoothCarControl block="BluetoothCarControl|%uartData"
     //% weight=92
@@ -804,9 +759,9 @@ namespace siwt_小车类 {
     //% color="#006400"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=10
     export function BluetoothCarControl(uartData: string): void {
-        if (uartData == "*CA") {
+        if (uartData == "*CB") {
             CarCtrl(CarState.Car_Run)
-        } else if (uartData == "*CB") {
+        } else if (uartData == "*CA") {
             CarCtrl(CarState.Car_Back)
         } else if (uartData == "*CC") {
             CarCtrl(CarState.Car_SpinLeft)
@@ -815,9 +770,9 @@ namespace siwt_小车类 {
         } else if (uartData == "*CE") {
             CarCtrl(CarState.Car_Stop)
         } else if (uartData == "*CADD") {
-            CarCtrl(CarState.Car_Stop)
+            CarCtrl(CarState.Car_SpeedUp)
         } else if (uartData == "*CSD") {
-            CarCtrl(CarState.Car_Stop)
+            CarCtrl(CarState.Car_SpeedDown)
         }
     }
     //% blockId=siwt_BluetoothServoControl block="BluetoothServoControl|%uartData"
@@ -836,34 +791,33 @@ namespace siwt_小车类 {
         if (uartData.indexOf("*1-") != -1) {
             index = uartData.indexOf("*1-");
             servo1 = parseInt(uartData.substr(3, uartData.length - 3))
-            Servo_Car(enServo.S1, servo1 ,10)
+            Servo_Car(enServo.S1, servo1, 0)
         }
         else if (uartData.indexOf("*2-") != -1) {
             index = uartData.indexOf("*2-");
             servo2 = parseInt(uartData.substr(3, uartData.length - 3))
-            Servo_Car(enServo.S2, servo2, 10)
+            Servo_Car(enServo.S2, servo2, 0)
         }
         else if (uartData.indexOf("*3-") != -1) {
             index = uartData.indexOf("*3-");
             servo3 = parseInt(uartData.substr(3, uartData.length - 3))
-            Servo_Car(enServo.S3, servo3, 10)
+            Servo_Car(enServo.S3, servo3, 0)
         }
         else if (uartData.indexOf("*4-") != -1) {
             index = uartData.indexOf("*4-");
             servo4 = parseInt(uartData.substr(3, uartData.length - 3))
-            Servo_Car(enServo.S4, servo4, 10)
+            Servo_Car(enServo.S4, servo4, 0)
         }
         else if (uartData.indexOf("*5-") != -1) {
             index = uartData.indexOf("*5-");
             servo5 = parseInt(uartData.substr(3, uartData.length - 3))
-            Servo_Car(enServo.S5, servo5, 10)
+            Servo_Car(enServo.S5, servo5, 0)
         }
         else if (uartData.indexOf("*6-") != -1) {
             index = uartData.indexOf("*6-");
             servo6 = parseInt(uartData.substr(3, uartData.length - 3))
-            Servo_Car(enServo.S6, servo6, 10)
+            Servo_Car(enServo.S6, servo6, 0)
         }
-
     }
     //% blockId=siwt_BluetoothModeSelect block="BluetoothModeSelect|%uartData"
     //% weight=92
@@ -938,8 +892,6 @@ namespace siwt_小车类 {
         buf[4] = (off >> 8) & 0xff;
         pins.i2cWriteBuffer(PCA9685_ADD, buf);
     }
-
-
     function Car_run(speed: number) {
         speed = speed * 16; // map 350 to 4096
         if (speed >= 4096) {
@@ -1002,7 +954,6 @@ namespace siwt_小车类 {
         }
         setPwm(12, 0, speed);
         setPwm(13, 0, 0);
-
         setPwm(15, 0, 0);
         setPwm(14, 0, 0);
         //pins.digitalWritePin(DigitalPin.P0, 0);
@@ -1054,6 +1005,15 @@ namespace siwt_小车类 {
         //pins.digitalWritePin(DigitalPin.P16, 1);
         //pins.analogWritePin(AnalogPin.P1, 1023-speed);
     }
+	function Car_SpeedUp() {
+        if(car_speed <= 250)
+	   car_speed+=5;
+    }
+	function Car_SpeedDown() {
+         if(car_speed >= 50)
+	    car_speed-=5;
+    }
+	
     //% blockId=siwt_ultrasonic_car block="ultrasonic return distance(cm)"
     //% color="#006400"
     //% weight=98
@@ -1074,7 +1034,7 @@ namespace siwt_小车类 {
         // read pulse
         let d = pins.pulseIn(echoPin, PulseValue.High, 11600);
         basic.pause(10);
-        return d / 40;
+        return Math.floor(d / 40);
         // send pulse
         //    pins.setPull(DigitalPin.P14, PinPullMode.PullNone);    
         //    pins.digitalWritePin(DigitalPin.P14, 0);
@@ -1125,31 +1085,50 @@ namespace siwt_小车类 {
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=9
     export function Servo_Car(num: enServo, value: number, speed: number): void {
         // 50hz: 20,000 us
-        while (value_past != value) {
-            if (value_past > value) {
+        if (num == 1) { value_past = value1_past; }
+        else if (num == 2) { value_past = value2_past; }
+        else if (num == 3) { value_past = value3_past; }
+        else if (num == 4) { value_past = value4_past; }
+        else if (num == 5) { value_past = value5_past; }
+        else if (num == 6) { value_past = value6_past; }
 
-                value_past - speed > value ? value_past -= speed : value_past--;
+
+        while (value_past != value) {
+            if (speed == 0 || value_past == -1) {
+                value_past = value;
                 let us = (value_past * 1800 / 180 + 600); // 0.6 ~ 2.4
                 let pwm = us * 4096 / 20000;
                 setPwm(num + 2, 0, pwm);
-                basic.pause(10);
-
-            }
+	    }
+	   else {
+		  if (value_past > value) {
+		      value_past - speed > value ? value_past -= speed : value_past--;
+		      let us = (value_past * 1800 / 180 + 600); // 0.6 ~ 2.4
+		      let pwm = us * 4096 / 20000;
+		      setPwm(num + 2, 0, pwm);
+		      basic.pause( 20);
+		    }
             else if (value_past < value) {
-
                 value_past + speed  < value ? value_past += speed : value_past++;
                 let us = (value_past * 1800 / 180 + 600); // 0.6 ~ 2.4
                 let pwm = us * 4096 / 20000;
                 setPwm(num + 2, 0, pwm);
-                basic.pause(10);
+                basic.pause(20);
+                }
+                {
+                    let us = (value_past * 1800 / 180 + 600); // 0.6 ~ 2.4
+                    let pwm = us * 4096 / 20000;
+                    setPwm(num + 2, 0, pwm);
+                }
+
             }
         }
-
-        {
-            let us = (value_past * 1800 / 180 + 600); // 0.6 ~ 2.4
-            let pwm = us * 4096 / 20000;
-            setPwm(num + 2, 0, pwm);
-        }
+        if (num == 1) { value1_past = value; }
+        else if (num == 2) { value2_past = value; }
+        else if (num == 3) { value3_past = value; }
+        else if (num == 4) { value4_past = value; }
+        else if (num == 5) { value5_past = value; }
+        else if (num == 6) { value6_past = value; }
     }
     //% blockId=siwt_Avoid_Sensor block="Avoid_Sensor|value %value"
     //% weight=95
@@ -1234,13 +1213,15 @@ namespace siwt_小车类 {
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=10
     export function CarCtrl(index: CarState): void {
         switch (index) {
-            case CarState.Car_Run: Car_run(255); break;
-            case CarState.Car_Back: Car_back(255); break;
-            case CarState.Car_Left: Car_left(255); break;
-            case CarState.Car_Right: Car_right(255); break;
+            case CarState.Car_Run: Car_run(car_speed); break;
+            case CarState.Car_Back: Car_back(car_speed); break;
+            case CarState.Car_Left: Car_left(car_speed); break;
+            case CarState.Car_Right: Car_right(car_speed); break;
             case CarState.Car_Stop: Car_stop(); break;
-            case CarState.Car_SpinLeft: Car_spinleft(255); break;
-            case CarState.Car_SpinRight: Car_spinright(255); break;
+            case CarState.Car_SpinLeft: Car_spinleft(car_speed); break;
+            case CarState.Car_SpinRight: Car_spinright(car_speed); break;
+	    case CarState.Car_SpeedUp:   Car_SpeedUp(); break;
+            case CarState.Car_SpeedDown: Car_SpeedDown(); break;
         }
     }
     //% blockId=siwt_CarCtrlSpeed block="CarCtrlSpeed|%index|speed %speed"
@@ -1267,31 +1248,27 @@ namespace siwt_小车类 {
     //% color="#006400"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=10
     export function MotorRun(index0: MotorNum, index1: MotorDir, speed: number) {
-        if (index0 == MotorNum.Motor0) {
+        if (index0 == MotorNum.Motor1) {
             if (index1 == MotorDir.clockwise) {
-                setPwm(12, 0, speed);
+                setPwm(12, 0, speed*16);
                 setPwm(13, 0, 0);
-
             }
             else if (index1 == MotorDir.anticlockwise) {
                 setPwm(12, 0, 0);
-                setPwm(13, 0, speed);
-
+                setPwm(13, 0, speed*16);
             }
         }
-        else if (index0 == MotorNum.Motor1) {
+        else if (index0 == MotorNum.Motor0) {
             if (index1 == MotorDir.clockwise) {
-                setPwm(14, 0, speed);
+                setPwm(14, 0, speed*16);
                 setPwm(15, 0, 0);
 
             }
             else if (index1 == MotorDir.anticlockwise) {
-                setPwm(15, 0, speed);
+                setPwm(15, 0, speed*16);
                 setPwm(14, 0, 0);
 
             }
-
         }
     }
 }
- 
