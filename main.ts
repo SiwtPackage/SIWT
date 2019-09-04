@@ -481,10 +481,10 @@ namespace siwt_传感器类 {
     export function Touch_Sensor(value: enIR): boolean {
         pins.setPull(DigitalPin.P9, PinPullMode.PullUp);
         if (pins.digitalReadPin(DigitalPin.P9) == value) {
-            return false;
+            return true;
         }
         else {
-            return true;
+            return false;
         }
     }
     //% blockId=siwt_Photosensitive_Sensor block="Photosensitive_Sensor|%value|光照"
