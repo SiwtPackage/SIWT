@@ -481,10 +481,10 @@ namespace siwt_传感器类 {
     export function Touch_Sensor(value: enIR): boolean {
         pins.setPull(DigitalPin.P9, PinPullMode.PullUp);
         if (pins.digitalReadPin(DigitalPin.P9) == value) {
-            return false;
+            return true;
         }
         else {
-            return true;
+            return false;
         }
     }
     //% blockId=siwt_Photosensitive_Sensor block="Photosensitive_Sensor|%value|光照"
@@ -744,10 +744,10 @@ namespace siwt_小车类 {
         Car_Right = 4,
         //% blockId="Car_Stop" block="停止"
         Car_Stop = 5,
-        //% blockId="Car_SpinLeft" block="原地左旋"
-        Car_SpinLeft = 7,
-        //% blockId="Car_SpinRight" block="原地右旋"
-        Car_SpinRight = 6,
+        //% blockId="Car_SpinLeft" block="原地右旋"
+        Car_SpinLeft = 6,
+        //% blockId="Car_SpinRight" block="原地左旋"
+        Car_SpinRight = 7,
 	//% blockId="Car_SpeedUp" block="加速"
 	Car_SpeedUp  = 8,
 	//% blockId="Car_SpeedDown" block="减速"
@@ -759,14 +759,15 @@ namespace siwt_小车类 {
     //% color="#006400"
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=10
     export function BluetoothCarControl(uartData: string): void {
+        // SpinLeft和SpinRight设置反了
         if (uartData == "*CB") {
             CarCtrl(CarState.Car_Run)
         } else if (uartData == "*CA") {
             CarCtrl(CarState.Car_Back)
         } else if (uartData == "*CC") {
-            CarCtrl(CarState.Car_SpinRight)
-        } else if (uartData == "*CD") {
             CarCtrl(CarState.Car_SpinLeft)
+        } else if (uartData == "*CD") {
+            CarCtrl(CarState.Car_SpinRight)
         } else if (uartData == "*CE") {
             CarCtrl(CarState.Car_Stop)
         } else if (uartData == "*CADD") {
@@ -1218,8 +1219,8 @@ namespace siwt_小车类 {
             case CarState.Car_Left: Car_left(car_speed); break;
             case CarState.Car_Right: Car_right(car_speed); break;
             case CarState.Car_Stop: Car_stop(); break;
-            case CarState.Car_SpinLeft: Car_spinright(car_speed); break;
-            case CarState.Car_SpinRight: Car_spinleft(car_speed); break;
+            case CarState.Car_SpinLeft: Car_spinleft(car_speed); break;
+            case CarState.Car_SpinRight: Car_spinright(car_speed); break;
 	    case CarState.Car_SpeedUp:   Car_SpeedUp(); break;
             case CarState.Car_SpeedDown: Car_SpeedDown(); break;
         }
@@ -1237,8 +1238,8 @@ namespace siwt_小车类 {
             case CarState.Car_Left: Car_left(speed); break;
             case CarState.Car_Right: Car_right(speed); break;
             case CarState.Car_Stop: Car_stop(); break;
-            case CarState.Car_SpinLeft: Car_spinright(speed); break;
-            case CarState.Car_SpinRight: Car_spinleft(speed); break;
+            case CarState.Car_SpinLeft: Car_spinleft(speed); break;
+            case CarState.Car_SpinRight: Car_spinright(speed); break;
         }
     }
     //% blockId=siwt_MotorRun block="MotorRun|%index0|%index1|speed%speed"
