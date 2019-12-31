@@ -103,9 +103,9 @@ namespace siwt_传感器类 {
     }
     export enum enIR {
         //% blockId="Get" block="检测到"
-        Get = 0,
+        Get = 1,
         //% blockId="NoVoice" block="未检测到"
-        NoGet = 1
+        NoGet = 0
     }
     export enum enOK {
         //% blockId="NotOK" block="异常"
